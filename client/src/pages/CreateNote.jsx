@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, Sparkles } from "lucide-react";
+import { Save, Sparkles, Wand2, Mic } from "lucide-react";
 import api from "../api";
 
 export default function CreateNote() {
   const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState("");
 
@@ -18,9 +20,42 @@ export default function CreateNote() {
 
       if (action === "title") {
         setTitle(response.data.result);
+      } else if (action === "improve") {
+        setContent(response.data.result);
+      } else if (action === "tags") {
+        setTags(response.data.result);
       }
-    } catch {
-      alert("AI request failed");
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          "AI request failed. Is the backend running?"
+      );
+    } finally {
+      setAiLoading("");
+    }
+  }
+
+  async function handleAudioUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setAiLoading("audio");
+
+    const formData = new FormData();
+    formData.append("audio", file);
+
+    try {
+      const response = await api.post("/transcribe", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setContent((prev) => prev + "\n\n" + response.data.text);
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Voice transcription failed"
+      );
     } finally {
       setAiLoading("");
     }
@@ -31,10 +66,18 @@ export default function CreateNote() {
     setSaving(true);
 
     try {
-      await api.post("/notes", { title, content });
+      await api.post("/notes", {
+        title,
+        content,
+        tags: tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+      });
+
       navigate("/notes");
-    } catch {
-      alert("Could not save note");
+    } catch (error) {
+      alert(error.response?.data?.message || "Could not save note");
     } finally {
       setSaving(false);
     }
@@ -42,46 +85,95 @@ export default function CreateNote() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-3xl font-semibold text-navy-900">Create a note</h1>
-      <p className="mt-2 text-slate-500">
-        Write your idea, then use AI to suggest a title.
-      </p>
+      <h1 className="text-3xl font-semibold text-navy-900">
+        Create a note
+      </h1>
 
       <form onSubmit={saveNote} className="mt-8 space-y-5">
         <div>
           <label className="mb-2 block text-sm font-medium">Title</label>
+
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-navy-700"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             required
           />
 
-          <button
-            type="button"
-            onClick={() => askAI("title")}
-            className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium transition hover:border-navy-700"
-          >
-            <Sparkles size={14} />
-            {aiLoading === "title" ? "Thinking..." : "Suggest AI title"}
-          </button>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => askAI("title")}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+            >
+              <Sparkles size={14} />
+              {aiLoading === "title" ? "Thinking..." : "AI Title"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => askAI("tags")}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+            >
+              <Sparkles size={14} />
+              {aiLoading === "tags" ? "Generating..." : "AI Tags"}
+            </button>
+          </div>
         </div>
 
         <div>
           <label className="mb-2 block text-sm font-medium">Note</label>
+
           <textarea
-            className="min-h-48 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-navy-700"
+            className="min-h-48 w-full rounded-xl border border-slate-200 bg-white px-4 py-3"
             value={content}
             onChange={(event) => setContent(event.target.value)}
             required
           ></textarea>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => askAI("improve")}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+            >
+              <Wand2 size={14} />
+              {aiLoading === "improve" ? "Improving..." : "Improve Writing"}
+            </button>
+
+            <label
+              htmlFor="audio-upload"
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+            >
+              <Mic size={14} />
+              {aiLoading === "audio" ? "Transcribing..." : "Voice Note"}
+            </label>
+
+            <input
+              id="audio-upload"
+              type="file"
+              accept="audio/*"
+              onChange={handleAudioUpload}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium">Tags</label>
+
+          <input
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3"
+            value={tags}
+            onChange={(event) => setTags(event.target.value)}
+            placeholder="study, react, ideas"
+          />
         </div>
 
         <button
-          className="flex items-center gap-2 rounded-xl bg-amber-brand px-6 py-3 font-semibold text-navy-900 transition hover:brightness-95"
+          className="rounded-xl bg-amber-brand px-6 py-3 font-semibold text-navy-900"
           disabled={saving}
         >
-          <Save size={18} />
           {saving ? "Saving..." : "Save note"}
         </button>
       </form>
