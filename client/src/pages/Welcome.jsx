@@ -6,8 +6,10 @@ import {
   Bell,
   ArrowRight,
 } from "lucide-react";
+import { useAuth } from "../auth/useAuth";
 
 export default function Welcome() {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-white">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -19,7 +21,7 @@ export default function Welcome() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
+          {user ? <Link to="/notes" className="rounded-xl bg-navy-900 px-5 py-2 text-sm font-semibold text-white">Open my notes</Link> : <><Link
             to="/login"
             className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:text-navy-900"
           >
@@ -30,7 +32,7 @@ export default function Welcome() {
             className="rounded-xl bg-navy-900 px-5 py-2 text-sm font-semibold text-white"
           >
             Get started
-          </Link>
+          </Link></>}
         </div>
       </header>
 
@@ -52,10 +54,10 @@ export default function Welcome() {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
-            to="/signup"
+            to={user ? "/notes" : "/signup"}
             className="flex items-center gap-2 rounded-xl bg-amber-brand px-7 py-4 font-semibold text-navy-900"
           >
-            Create free account
+            {user ? "Open my notes" : "Create free account"}
             <ArrowRight size={18} />
           </Link>
 

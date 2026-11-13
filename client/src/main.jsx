@@ -15,7 +15,13 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Reminders from "./pages/Reminders.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Profile from "./pages/Profile.jsx";
+import Settings from "./pages/Settings.jsx";
+import Privacy from "./pages/Privacy.jsx";
+import Terms from "./pages/Terms.jsx";
 import Layout from "./components/Layout.jsx";
+import { AuthProvider } from "./auth/AuthContext.jsx";
+import { GuestRoute, ProtectedRoute } from "./auth/RouteGuards.jsx";
 
 const router = createBrowserRouter([
   {
@@ -23,24 +29,30 @@ const router = createBrowserRouter([
     element: <Welcome />,
   },
   {
-    path: "/",
-    element: <Layout />,
+    element: <GuestRoute />,
     children: [
-      { path: "notes", element: <Notes /> },
-      { path: "notes/new", element: <CreateNote /> },
-      { path: "notes/:id/edit", element: <EditNote /> },
-      { path: "reminders", element: <Reminders /> },
-      { path: "about", element: <About /> },
+      { path: "/login", element: <Login /> },
+      { path: "/signup", element: <Signup /> },
     ],
   },
+  { path: "/about", element: <About /> },
   {
-    path: "/login",
-    element: <Login />,
+    element: <ProtectedRoute />,
+    children: [{
+      path: "/",
+      element: <Layout />,
+      children: [
+        { path: "notes", element: <Notes /> },
+        { path: "notes/new", element: <CreateNote /> },
+        { path: "notes/:id/edit", element: <EditNote /> },
+        { path: "reminders", element: <Reminders /> },
+        { path: "profile", element: <Profile /> },
+        { path: "settings", element: <Settings /> },
+      ],
+    }],
   },
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
+  { path: "/privacy", element: <Privacy /> },
+  { path: "/terms", element: <Terms /> },
   {
     path: "*",
     element: <NotFound />,
@@ -49,6 +61,6 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider><RouterProvider router={router} /></AuthProvider>
   </StrictMode>
 );

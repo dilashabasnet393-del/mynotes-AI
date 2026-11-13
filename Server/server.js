@@ -12,15 +12,17 @@ import reminderRoutes from "./routes/reminders.js";
 import "./cron/reminders.js";
 
 dotenv.config();
-console.log("GROQ key loaded:", process.env.GROQ_API_KEY ? "YES" : "NO");
-console.log("GEMINI key loaded:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 const app = express();
+
+const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json({ limit: "25mb" }));
@@ -37,6 +39,10 @@ app.get("/", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is required. Add a long random value to server/.env");
+}
 
 connectDB().then(() => {
   app.listen(PORT, () => {

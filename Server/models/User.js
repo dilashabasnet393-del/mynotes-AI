@@ -13,9 +13,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      maxlength: 254,
     },
     password: {
       type: String,
+      select: false,
+      required() {
+        return this.provider === "local";
+      },
     },
     provider: {
       type: String,
@@ -23,7 +28,15 @@ const userSchema = new mongoose.Schema(
       default: "local",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform(_doc, ret) {
+        delete ret.password;
+        return ret;
+      },
+    },
+  },
 );
 
 export default mongoose.model("User", userSchema);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, Sparkles, Wand2, Mic } from "lucide-react";
+import { Sparkles, Wand2, Mic } from "lucide-react";
 import api from "../api";
 
 export default function CreateNote() {

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../api";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,8 +17,8 @@ export default function Login() {
     setError("");
 
     try {
-      await api.post("/auth/login", { email, password });
-      navigate("/notes");
+      await login({ email, password });
+      navigate(location.state?.from?.pathname || "/notes", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {

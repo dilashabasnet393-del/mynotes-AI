@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Search, Trash2, Plus, NotebookPen } from "lucide-react";
+import { BookOpen, Search, Plus, NotebookPen } from "lucide-react";
 import api from "./api";
 import NoteCard from "./components/NoteCard";
 
@@ -26,6 +26,8 @@ function App() {
   }
 
   useEffect(() => {
+    // Load remote data after mount; getNotes updates loading and notes from its request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     getNotes();
   }, []);
 

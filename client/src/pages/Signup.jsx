@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api";
+import { useAuth } from "../auth/useAuth";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { signup } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -25,7 +26,7 @@ export default function Signup() {
     setError("");
 
     try {
-      await api.post("/auth/signup", form);
+      await signup(form);
       navigate("/notes");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
@@ -68,6 +69,8 @@ export default function Signup() {
             name="password"
             type="password"
             placeholder="Password"
+            minLength={8}
+            maxLength={128}
             className="w-full rounded-xl border border-slate-200 px-4 py-3"
             value={form.password}
             onChange={update}
@@ -94,6 +97,7 @@ export default function Signup() {
             Log in
           </Link>
         </p>
+        <p className="mt-4 text-center text-xs text-slate-500">By signing up, you agree to our <Link className="underline" to="/terms">Terms</Link> and <Link className="underline" to="/privacy">Privacy Policy</Link>.</p>
       </div>
     </div>
   );

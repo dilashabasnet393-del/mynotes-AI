@@ -1,13 +1,14 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { NotebookPen, LogOut } from "lucide-react";
-import api from "../api";
+import { NotebookPen, LogOut, UserRound, Settings } from "lucide-react";
+import { useAuth } from "../auth/useAuth";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   async function handleLogout() {
     try {
-      await api.post("/auth/logout");
+      await logout();
     } catch {
       // Even if request fails, send user to login
     } finally {
@@ -27,32 +28,32 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
-          <NavLink
+          {user && <NavLink
             to="/notes"
             className={({ isActive }) =>
               isActive ? "text-navy-900" : "transition hover:text-navy-900"
             }
           >
             My Notes
-          </NavLink>
+          </NavLink>}
 
-          <NavLink
+          {user && <NavLink
             to="/notes/new"
             className={({ isActive }) =>
               isActive ? "text-navy-900" : "transition hover:text-navy-900"
             }
           >
             New Note
-          </NavLink>
+          </NavLink>}
 
-          <NavLink
+          {user && <NavLink
             to="/reminders"
             className={({ isActive }) =>
               isActive ? "text-navy-900" : "transition hover:text-navy-900"
             }
           >
             Reminders
-          </NavLink>
+          </NavLink>}
 
           <NavLink
             to="/about"
@@ -63,13 +64,16 @@ export default function Navbar() {
             About
           </NavLink>
 
+          {user ? <>
+          <NavLink to="/profile" className={({ isActive }) => isActive ? "text-navy-900" : "transition hover:text-navy-900"}><UserRound size={15} className="inline" /> Profile</NavLink>
+          <NavLink to="/settings" className={({ isActive }) => isActive ? "text-navy-900" : "transition hover:text-navy-900"}><Settings size={15} className="inline" /> Settings</NavLink>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 transition hover:border-navy-700 hover:text-navy-900"
           >
             <LogOut size={16} />
             Logout
-          </button>
+          </button></> : <><Link to="/login">Log in</Link><Link to="/signup" className="rounded-xl bg-navy-900 px-4 py-2 text-white">Sign up</Link></>}
         </div>
       </nav>
     </header>
