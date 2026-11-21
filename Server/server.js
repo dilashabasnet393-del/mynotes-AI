@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
@@ -15,13 +14,6 @@ dotenv.config();
 console.log("GROQ key loaded:", process.env.GROQ_API_KEY ? "YES" : "NO");
 console.log("GEMINI key loaded:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 const app = express();
-
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
 
 app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
