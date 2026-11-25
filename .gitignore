@@ -1,4 +1,4 @@
-# Dependencies
+## Dependencies
 node_modules/
 
 # Environment variables and secrets
@@ -16,6 +16,6 @@ Server/build/
 *.log
 npm-debug.log*
 
-# System files
+## System files
 .DS_Store
 Thumbs.dbs
